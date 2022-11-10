@@ -15,7 +15,6 @@ calib.input <- sfcr_set(
   bs ~ 0.3,
   l ~ 0.2,
   fs ~ 0.2,
-  e ~ 2,  
   pi ~ 0.03,
   u ~ 0.8,
   v ~ 1.5,
@@ -39,8 +38,10 @@ calib.input <- sfcr_set(
   share_world_GDP ~ 0.06,
   phi_s ~ 0.03,
   phi_row ~ 0.9,
-  varepsilon ~ 0.5
-  )
+  varepsilon1 ~ 0.5, 
+  varepsilon2 ~ 0.1,
+  phi_d ~ 1
+)
 
 
 jgbop.calib <- sfcr_set(
@@ -111,7 +112,10 @@ jgbop.calib <- sfcr_set(
   Phi2 ~ (B * pi.fac) / (Ps * Ys * ((1 + i)/ ((1+is) * (1+phi_s) * (eet / e) ))^phi_row),
   e2 ~ e / (1+pi), # O ideal seria ee_t+1 = ee_t + varepsilon ( e_t-1 - ee_t-1)
   ee ~ eet / (1+pi),
-  eet ~ ee +  varepsilon * ( e2 / (1+pi) - ee / (1+pi)),
+  eet ~ ee +  varepsilon1 * ( e2 / (1+pi) - ee / (1+pi)),
+  Phi1 ~ (Fs * pi.fac / D) * ( ( 1 + i) / ((1 + is) * phi_d * (eet / e) )),
+  eq ~ (i * Bs / (1+pi) - P * X) / (is * Fs / (1+pi) - Ps * M),
+  e ~ e / (1+pi) * varepsilon2 * eq #Aqui o modelo da pau
 )
 
 
