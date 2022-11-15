@@ -47,9 +47,7 @@ calib.input <- sfcr_set(
   wg ~ 0.6,
   sigma1 ~ 0.7,
   sigma3 ~ 1,
-  sf ~ 0.25,
-  # e ~ 2,
-  # Ps ~ 0.9
+  sf ~ 0.25
 )
 
 
@@ -86,7 +84,6 @@ jgbop.calib <- sfcr_set(
   Savb ~ -D * pi.fac + Lb * pi.fac + Bb * pi.fac + Rb * pi.fac , # Savb is not zero and should not be. Counterfactually, it is negative in the model because of inflation-exchange rate nexus
   Savb2 ~ pi.fac * Vb - e * pi.fac * Fs ,
   CheckSAV ~ Savh + Savf + Savg - CA + Savb + Savcb,
-  # Por conta da inflacao internacional, as variaveis nao vao crescer a mesma taxa no steady state.
   
   # Now, get values for non-financial variables
   Y ~ u * K / v,
