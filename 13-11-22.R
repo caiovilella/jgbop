@@ -62,15 +62,15 @@ jgbop.calib <- sfcr_set(
   Rcb ~ rcb * P * K / e,
   Lb ~ l * P * K,
   Fs ~ fs * P * K / e , #Alterei esta equação
-  Rb ~ Bcb , #Perguntar ao Italo
+  Rb ~ Bcb , 
   D ~ Bb + e * Fs + Lb + Rb , # assumes Vb = 0
   rho ~ Bb / D,
   Vh ~ D,
   Vf ~ P * K - Lb, 
-  Vb ~ Bb + e * Fs + Lb + Rb - D + e * pi.fac * Fs ,
+  Vb ~ Bb + e * Fs + Lb + Rb - D  ,
   Vg ~ -B,
-  Vcb ~ Bcb + e * Rcb - Rb + e * pi.fac * Rcb ,
-  Vs ~ Bs - e * Fs - e * Rcb - (e * pi.fac) * (Fs + Rcb),
+  Vcb ~ Bcb + e * Rcb - Rb  ,
+  Vs ~ Bs - e * Fs - e * Rcb ,
   CheckV ~ Vh + Vb + Vg + Vcb + Vs + Vf - P * K,
   
   # Second, conditional on the BS matrix, calibrate the net borrowing/lending
@@ -79,9 +79,9 @@ jgbop.calib <- sfcr_set(
   Savh ~ D * pi.fac,
   Savf ~ -Lb * pi.fac,
   Savg ~ -B * pi.fac,
-  CA ~ -Bs * pi.fac + e * pi.fac * (Fs + Rcb),
-  Savcb ~ Bcb * pi.fac - Rb * pi.fac + e * pi.fac * Rcb,
-  Savb ~ -D * pi.fac + Lb * pi.fac + Bb * pi.fac + Rb * pi.fac + e * pi.fac * Fs, # Savb is not zero and should not be. Counterfactually, it is negative in the model because of inflation-exchange rate nexus
+  CA ~ -Bs * pi.fac ,
+  Savcb ~ Bcb * pi.fac - Rb * pi.fac ,
+  Savb ~ -D * pi.fac + Lb * pi.fac + Bb * pi.fac + Rb * pi.fac , # Savb is not zero and should not be. Counterfactually, it is negative in the model because of inflation-exchange rate nexus
   CheckSAV ~ Savh + Savf + Savg - CA + Savb + Savcb,
   # Por conta da inflacao internacional, as variaveis nao vao crescer a mesma taxa no steady state.
   
@@ -90,16 +90,16 @@ jgbop.calib <- sfcr_set(
   G ~ g * Y, # let us assume no WBjg at the baseline scenario (to introduce the policy thereafter). Furthermore, with a nill interest on Rcb, Picb is 0. Then
   
   
-  Picb ~ i * ( Bcb - Rb ) / (1 + pi) + e * pi.fac * Rcb, #according to table 2 it should be Rb insted of Rcb.
+  Picb ~ i * ( Bcb - Rb ) / (1 + pi) , #according to table 2 it should be Rb insted of Rcb.
   Ta ~ Savg + P * G + i * (B / (1+pi)) - Picb, # this equation closes the government's constraint
   I ~ delta * K,
   Piuf ~ Savf + P * I, # this equation closes the firm's sector capital account
   X ~ x * Y,
   M ~ m * Y,
   
-  Ps ~ ( P * X + i * Bs / ( 1 + pi ) - is * e * Fs - CA + e * pi.fac * (Rcb + Fs) ) / ( e * M ), # This equation closes the RW sector
+  Ps ~ ( P * X + i * Bs / ( 1 + pi ) - is * e * Fs - CA  ) / ( e * M ), # This equation closes the RW sector
   
-  # e ~ (P * X + i * Bs / (1+pi) - CA) / (Ps * M + is * Fs - pi.fac * (Rcb + Fs)),
+ 
   W ~ ( 1 / alpha ) * ( P / ( 1 + tau ) - beta * e * Ps ),
   alpha ~ Nf / Y,
   Nf ~ (1 - unemp) * N,
@@ -111,8 +111,8 @@ jgbop.calib <- sfcr_set(
   Pidf ~ Pi - Piuf,
   SavhCheck ~ W * Nf + Pidf + Pidb - Ta + i * D / ( 1 + pi ) - P * C - Savh,
   Pib ~ i * ( Lb + Bb + Rb - D ) / ( 1 + pi ) + is * e * Fs , #this equation closes the banks' sector
-  # Piub ~ Savb,
-  Pidb ~ Pib, 
+  Piub ~ Savb,
+  Pidb ~ Pib - Piub, 
   YD ~ (1 - psi) * Y,
   Yk ~ K/(1+pi) / v,
   
@@ -128,11 +128,13 @@ jgbop.calib <- sfcr_set(
   a_exp ~ X / (Ys^zeta_x1 * (P / e * Ps)^zeta_x0),
   Ys ~ Y / share_world_GDP,
   Phi3 ~ (Bs * pi.fac - Phi4 * (e * pi.fac) * (B / (1+pi))) / (Ps * Ys * ((1 + i)/ ((1+is) * (1+phi_s) * (eet / e) ))^phi_row),
-  e2 ~ e / (1+pi), # O ideal seria ee_t+1 = ee_t + varepsilon ( e_t-1 - ee_t-1)
+   # O ideal seria ee_t+1 = ee_t + varepsilon ( e_t-1 - ee_t-1)
   ee ~ eet / (1+pi),
-  eet ~ ee +  varepsilon1 * ( e2 / (1+pi) - ee / (1+pi)),
+  eet ~ ee +  varepsilon1 * ( e / (1+pi) - ee / (1+pi)),
   Phi2 ~ (Phi1 * D * ( ( 1 + i) / ((1 + is) * phi_d * (eet / e) )) ) / ((e * pi.fac) * Fs),
-  eq ~ (i * Bs / (1+pi) + P * X) / (is * Fs + Ps * M - pi.fac * (Rcb + Fs)),
+  
+  eq ~ (i * Bs / (1+pi) + P * X) / (is * Fs + Ps * M ),
+  
   e ~ Fs / Bs + varepsilon2 * eq
 )
 
