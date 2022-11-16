@@ -128,8 +128,8 @@ jgbop.calib <- sfcr_set(
   varphi1 ~ ( ( P * pi.fac) / ( P / (1+pi) ) ) * ( 1 / (omega -( omega_f - varphi2 * er))),
   
   #Foreign sector
-  b_imp ~ M / (((Y / (1+pi))^zeta_m1) / e * (e * Ps / P)^zeta_m0),
-  a_exp ~ X / (e * Ys^zeta_x1 * (P / e * Ps)^zeta_x0),
+  b_imp ~ M / (((Y / (1+pi))^zeta_m1) * (e * Ps / P)^zeta_m0),
+  a_exp ~ X / (Ys^zeta_x1 * (P / e * Ps)^zeta_x0),
   Ys ~ Y / share_world_GDP,
   Phi2 ~ (Bs * pi.fac ) / (e * Ps * Ys * ((1 + i)/ ((1+is) * (1+phi_s) * (eet / e) ))^phi_row),
    # O ideal seria ee_t+1 = ee_t + varepsilon ( e_t-1 - ee_t-1)
@@ -228,9 +228,19 @@ jgbop.model <- sfcr_set(
 
   #SFC RW
   CA ~ P * X - e * Ps * M + is * e * Fs[-1] - i * Bs[-1] ,
-  # Rcb ~ Rcb[-1] + (CA + (Bs - Bs[-1])) / e - (Fs - Fs[-1]),
-  e ~  ((Rcb - Rcb[-1]) - Ps * Ys * Phi2 * ( ( 1 + i) / ((1 + is) * ( 1 + phi_s) * (eet[-1] / e[-1])) )^phi_row + 
-          Ps * M - is * Fs[-1]) / (P * X - i * Bs[-1] + Phi1 * D * (((1 + is) * phi_d * (eet[-1]/ e[-1])) / (1 + i) )),
+  
+  #tentativa 1
+  Rcb ~ Rcb[-1] + (CA + (Bs - Bs[-1])) / e - (Fs - Fs[-1]),
+  
+  #Tentativa 2
+  # e ~  ((Rcb - Rcb[-1]) - Ps * Ys * Phi2 * ( ( 1 + i) / ((1 + is) * ( 1 + phi_s) * (eet[-1] / e[-1])) )^phi_row + 
+          # Ps * M - is * Fs[-1]) / (P * X - i * Bs[-1] + Phi1 * D * (((1 + is) * phi_d * (eet[-1]/ e[-1])) / (1 + i) )),
+  
+  #Tentativa 3
+  # fec ~  ( - Ps * Ys * Phi2 * ( ( 1 + i) / ((1 + is) * ( 1 + phi_s) * (eet[-1] / e[-1])) )^phi_row + 
+  #         Ps * M - is * Fs[-1]) / (P * X - i * Bs[-1] + Phi1 * D * (((1 + is) * phi_d * (eet[-1]/ e[-1])) / (1 + i) )),
+  # Rcb ~ Rcb[-1] + 0.2 * fec,
+  # e ~ 0.8 * fec,
   Vs ~ Bs - e * Fs - e * Rcb ,
    
   #Equacoes comportamentais
@@ -317,7 +327,9 @@ jgbop.pars <- sfcr_set(
   Phi2 ~ calib.output$Phi2,
   varepsilon1 ~ calib.output$varepsilon1,
   varepsilon2 ~ calib.output$varepsilon2,
-  Rcb ~ calib.output$Rcb
+  # Rcb ~ calib.output$Rcb,
+  
+  e ~ calib.output$e
 )
  
 jgbop.init <- sfcr_set(
@@ -331,7 +343,7 @@ jgbop.init <- sfcr_set(
   B ~ calib.output$B,
   Bcb ~ calib.output$Bcb,
   Bs ~ calib.output$Bs,
-  # Rcb ~ calib.output$Rcb,
+  Rcb ~ calib.output$Rcb,
   W ~ calib.output$W,
   P ~ calib.output$P,
   Vh ~ calib.output$Vh,
@@ -345,8 +357,41 @@ jgbop.base <- sfcr_baseline(
   external = jgbop.pars,
   initial = jgbop.init,
   method = "Gauss",
-  periods = 100
+  periods = 200
 )
 
 
+jgbop.base <- jgbop.base[-1,]
          
+#Secao de testes
+#teste horizontal
+b <- jgbop.base %>% mutate( teste = Vh + Vf - B + Vcb + Vs - P * K )
+b$teste
+#teste dos bancos 
+b <- b %>% mutate( teste2 = Bb + Rb - D + Lb + e * Fs ) 
+b$teste2
+b <- b %>% mutate( testeB2 = Bb * pi/(1+pi) + Rb* pi/(1+pi) - D* pi/(1+pi) + Lb* pi/(1+pi) + e * Fs * pi/(1+pi) )
+b$testeB2
+#teste do setor do governo
+b <- b %>% mutate( teste3 = Savg + B - lag(B))
+b$teste3
+b <- b %>% mutate( testeG2 = Savg + P * G - Ta - Picb + i * lag(B))
+b$testeG2
+#teste do setor das familias
+b <- b %>% mutate( teste4 = W * Nf + Pidf + Pidb + i * lag(D) - P * C - Ta - Savh)
+b$teste4
+#teste do setor corrente das firmas
+b <- b %>% mutate( teste5 = P * C + P * I + P * G + P * X - Ps * e * M - W * Nf - Pif - i * lag(Lb) ) 
+b$teste5
+b <- b %>% mutate(testeF2 = Savf + Lb - lag(Lb))
+b$testeF2
+#Teste do Setor externo
+b <- b %>% mutate( teste6 = CA  + (Bs - lag(Bs))  )
+b$teste6
+b <- b %>% mutate( testeRW2 = CA - P * X + e * Ps * M - is * e * Fs + i * lag(Bs))
+b$testeRW2
+#Teste do BC
+b <- b %>% mutate(testeBC = Picb - i * lag(Bcb) + i * lag(Rb))
+b$testeBC
+b <- b %>% mutate(testeBC2 = (Rb - lag(Rb)) - (Bcb - lag(Bcb)) )
+b$testeBC2
