@@ -17,7 +17,6 @@ calib.input <- sfcr_set(
   rcb ~ 0.1,
   bs ~ 0.3,
   l ~ 0.2,
-  Fs ~ 7.5,
   pi ~ 0.05,
   u ~ 0.8,
   v ~ 1.5,
@@ -38,7 +37,6 @@ calib.input <- sfcr_set(
   zeta_x0 ~ -0.15,
   zeta_x1 ~ 1.1,
   share_world_GDP ~ 0.1,
-  # phi_s2 ~ 0.1,
   phi_s ~ 0.03,
   phi_d ~ 1,
   wg ~ 0,
@@ -47,7 +45,8 @@ calib.input <- sfcr_set(
   sigma4 ~ 0.1,
   sf ~ 0.3,
   gamma ~ 0.1,
-  varepsilon1 ~ 0.5121951
+  varepsilon1 ~ 0.5121951,
+  e ~ 2
 )
 
 
@@ -60,14 +59,14 @@ jgbop.calib <- sfcr_set(
   Rcb ~ rcb * P * K / e,
   Lb ~ l * P * K,
   Rb ~ Bcb , 
-  D ~ Bb + e * Fs + Lb + Rb , # assumes Vb = 0
+  D ~ Bb + Lb + Rb , # assumes Vb = 0
   rho ~ Bb / D,
   Vh ~ D,
   Vf ~ P * K - Lb, 
-  Vb ~ Bb + e * Fs + Lb + Rb - D ,
+  Vb ~ Bb + Lb + Rb - D ,
   Vg ~ -B,
   Vcb ~ Bcb + e * Rcb - Rb  ,
-  Vs ~ Bs - e * Fs - e * Rcb ,
+  Vs ~ Bs - e * Rcb ,
   CheckV ~ Vh + Vb + Vg + Vcb + Vs + Vf - P * K,
   
   # Second, conditional on the BS matrix, calibrate the net borrowing/lending
@@ -79,7 +78,7 @@ jgbop.calib <- sfcr_set(
   Savf ~ -Lb * pi.fac,
   Savg ~ -B * pi.fac,
   CA ~ -Bs * pi.fac ,
-  CA2 ~ -pi.fac * Vs - e * pi.fac * (Fs + Rcb),
+  CA2 ~ -pi.fac * Vs - e * pi.fac * Rcb,
   Savcb ~ Bcb * pi.fac - Rb * pi.fac ,
   Savcb2 ~ pi.fac * Vcb - e * pi.fac * Rcb,
   Savb ~ -D * pi.fac + Lb * pi.fac + Bb * pi.fac + Rb * pi.fac , # Savb is not zero and should not be. Counterfactually, it is negative in the model because of inflation-exchange rate nexus
@@ -116,7 +115,7 @@ jgbop.calib <- sfcr_set(
   Piuf ~ Pif * sf,
   Pidf ~ Pif - Piuf,
   SavhCheck ~ W * Nf + Pidf + Pidb - Ta + i * D / ( 1 + pi ) - P * C - Savh,
-  Pib ~ i * ( Lb + Bb + Rb - D ) / ( 1 + pi ) + is * e * Fs , #this equation closes the banks' sector
+  Pib ~ i * ( Lb + Bb + Rb - D ) / ( 1 + pi ) , #this equation closes the banks' sector
   Lf ~ Lb,
   Pidb ~ Pib - Piub, 
   Piub ~ Savb,
@@ -129,12 +128,12 @@ jgbop.calib <- sfcr_set(
   #Foreign sector
   X ~ x * Y,
   M ~ beta * Y,
-  Ps ~ ( P * X - i * Bs / ( 1 + pi ) + is * e * Fs - CA  ) / ( e * M ), # This equation closes the RW sector
+  Ps ~ ( P * X - i * Bs / ( 1 + pi ) - CA  ) / ( e * M ), # This equation closes the RW sector
   a_exp ~ X / (Ys^zeta_x1 * (P / (e * Ps))^zeta_x0),
   b_imp ~ M / ((Y^zeta_m1) * (e * Ps / P)^zeta_m0),
   
   Ys ~ Y / share_world_GDP,
-  Phi2 ~ Bs / (e * Ps * Ys * ((1 + r)/ ((1+is) * (1+phi_s) * (eet / e) ))),
+  Phi ~ Bs / (e * Ps * Ys * ((1 + i)/ ((1+is) * (1+phi_s) * (eet / e) ))),
   # phi_s ~ phi_s1 - phi_s2 * 0 ,
   
   # O ideal seria ee_t+1 = ee_t + varepsilon ( e_t-1 - ee_t-1)
@@ -142,11 +141,9 @@ jgbop.calib <- sfcr_set(
   eet ~ e * (1+pi),
   # varepsilon1 ~ (eet - ee) / ( e / (1+pi) - ee / (1+pi)),
   
-  Phi1 ~ Fs / (( D / e) * (((1+is) *phi_d * (eet / e)) / (1+r) )),
-  
   er ~ e * Ps / P,
   
-  e ~ Bs / Fs,
+  epsilon ~ e / Bs,
   wage_share ~ omega * alpha, #WS = W*N / P*Y =(W/P) * (N/Y) = omega * alpha
   Pi_share ~ (Pif) / (P * Y), 
 )
