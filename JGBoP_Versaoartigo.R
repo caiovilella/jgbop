@@ -1,6 +1,6 @@
-install.packages("sfcr")
-install.packages("tidyverse")
-install.packages("ggplot")
+# install.packages("sfcr")
+# install.packages("tidyverse")
+# install.packages("ggplot")
 library( sfcr )
 library( tidyverse )
 library( ggplot2 )
@@ -9,6 +9,9 @@ library(gridExtra)
 #################################
 ###    CALIBRATION           ####
 #################################
+
+## Testes#### 
+
 calib.input <- sfcr_set( 
   b ~ 0.5,
   P ~ 1,
