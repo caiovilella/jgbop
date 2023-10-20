@@ -4,7 +4,7 @@
 
 jgbop.base.longo %>% filter( name == "Y" ) %>%
   ggplot( aes( x = period, y = value ) ) +
-  ylim(50,60)+
+  # ylim(50,60)+
   geom_line( ) +
   ggtitle( "Renda" )
 
@@ -18,7 +18,7 @@ jgbop.base.longo %>% filter( name == "pi" ) %>%
 jgbop.base.longo %>% filter( name == "er" ) %>%
   ggplot( aes( x = period, y = value ) ) +
   geom_line( ) +
-  ylim(0.9,1)+
+  # ylim(0.9,1)+
   ggtitle( "Câmbio Real" )
 
 
@@ -40,7 +40,7 @@ jgbop.base %>% mutate (wf = omega_f0 - varphi2 * er,
 
 jgbop.base %>% 
   pivot_longer( cols=-period) %>%
-  filter(name == "K_inflow") %>%
+  filter(name == "K_flow") %>%
   ggplot(aes( x = period, y = value, group = name, color =name))+
   geom_line()+
   ggtitle( "Fluxo de Capital" )
